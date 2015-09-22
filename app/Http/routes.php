@@ -14,3 +14,15 @@
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('abc1', function () {
+     var_dump(config('mysql'));
+});
+Route::get('/test/home','test\TestController@home');
+Route::get('admin/list','admin\AdminController@index');
+Route::get('admin/list1','admin\AdminController@index1');
+Route::get('admin/f',function(){
+    return 'fff';
+});
+Route::get('articles','ArticlesController@index');
+Route::get('articles/view','ArticlesController@view');
+Route::get('articles/{$id}','ArticlesController@show');
