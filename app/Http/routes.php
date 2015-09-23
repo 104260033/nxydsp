@@ -25,4 +25,6 @@ Route::get('admin/f',function(){
 });
 Route::get('articles','ArticlesController@index');
 Route::get('articles/view','ArticlesController@view');
-Route::get('articles/{$id}','ArticlesController@show');
+Route::get('articles/create','ArticlesController@create');
+Route::get('articles/{id}','ArticlesController@show');
+Route::post('articles','ArticlesController@store');
