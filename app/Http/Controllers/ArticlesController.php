@@ -2,14 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use Request;
+//use Request;
 use Carbon\Carbon;
 use App\Article;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use App\Http\requests\ArticleRequest;
+use Illuminate\Http\Request;
 
 class ArticlesController extends Controller
 {
+
+    public function __construct(){
+        $this->middleware('auth');
+    }
     /**
      * Display a listing of the resource.
      *
@@ -17,23 +23,10 @@ class ArticlesController extends Controller
      */
     public function index()
     {
-        $articles = Article::all();
-        return $articles;
-    }
-    public function setCreatedAtAttribute($date){
-        // 未来日期的当前时间
-        //$this->attributes['published_at'] = Carbon::createFromFormat('Y-m-d', $date);
-
-        // 未来日期的0点
-        $this->attributes['created_at'] = Carbon::parse($date);
-    }
-    public function view()
-    {
+        //return \Auth::user();
         //方法一
         $articles = Article::latest('created_at')->get();
-        foreach($articles as $article) {
-             $a = dd($article->created_at->addDays(8)->format('Y-m'));
-        }
+
         //方法二
         //$articles = Article::orderBy('published_at', 'desc')->get();
 
@@ -41,6 +34,15 @@ class ArticlesController extends Controller
         //或者也可以使用这种方式
         //return view('articles.index')->with('articles', $articles);
     }
+
+    public function setCreatedAtAttribute($date){
+        // 未来日期的当前时间
+        //$this->attributes['published_at'] = Carbon::createFromFormat('Y-m-d', $date);
+
+        // 未来日期的0点
+        $this->attributes['created_at'] = Carbon::parse($date);
+    }
+
     public function scopePublished($query){
         $query->where('created_at', '<=', Carbon::now());
     }
@@ -60,14 +62,12 @@ class ArticlesController extends Controller
      * @param  Request  $request
      * @return Response
      */
-    public function store(Request $request)
+    public function store(ArticleRequest $request)
     {
-        $input = Request::all();
-
-        $input['published_at'] = Carbon::now();
-
-        Article::create($input);
-
+        //验证
+        //$this->validate($request, ['title' => 'required|min:3', 'content' =>'required', 'published_at' => 'required|date']);
+        $article = new Article($request->all());
+        \Auth::user()->articles()->save($article);
         return redirect('articles/view');
     }
 
@@ -96,7 +96,8 @@ class ArticlesController extends Controller
      */
     public function edit($id)
     {
-        //
+        $article = Article::findOrFail($id);
+        return view('articles.edit',\compact('article'));
     }
 
     /**
@@ -106,9 +107,11 @@ class ArticlesController extends Controller
      * @param  int  $id
      * @return Response
      */
-    public function update(Request $request, $id)
+    public function update(ArticleRequest $request, $id)
     {
-        //
+        $article = Article::findOrFail($id);
+        $article->update($request->all());
+        return redirect('articles');
     }
 
     /**
